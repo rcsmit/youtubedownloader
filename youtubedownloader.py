@@ -82,9 +82,15 @@ def downloadplaylist(url):
 
     # physically downloading the audio track
     for n,video in enumerate(playlist.videos):
-        print (f"Downloading {n}/{len(playlist.video_urls)} - {video.title}")
-        audioStream = video.streams.get_by_itag(YOUTUBE_STREAM_AUDIO)
-        audioStream.download()
+        try:
+            print (f"Downloading {n}/{len(playlist.video_urls)} - {video.title}")
+            audioStream = video.streams.get_by_itag(YOUTUBE_STREAM_AUDIO)
+            audioStream.download()
+        except:
+            # some videos give 403 error
+            # too lazy to implement this (yet)
+            # https://github.com/pytube/pytube/issues/399
+            print (f"ERROR Downloading {n}/{len(playlist.video_urls)} - {video.title}")
 
 def main():
     url = input("URL: ")

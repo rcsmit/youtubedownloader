@@ -32,17 +32,31 @@ import time
 import sys
 from pytube import YouTube
 from pytube import Playlist
+from random import randint
+from time import sleep
+
 
 
 FFMPEGLOC = 'C://Users/rcxsm/Documents/phyton_scripts/'
 
 def cleanup(test_string):
+    """[summary]
+
+    Args:
+        test_string ([type]): [description]
+
+    Returns:
+        [type]: [description]
+    """
     bad_chars = [":",';', ',', '/', ':', '!', "'","*","(",")"]
     result_string = ''.join(i for i in test_string if not i in bad_chars)
     #result_string = result_string.replace(" ", "_")
     return result_string
 
 def download(durl):
+
+    """[summary]
+    """
     s1 = (int(time.time()))
      # Title and Time
     title=cleanup(((YouTube(durl)).title))
@@ -72,9 +86,25 @@ def download(durl):
     s4 = s3-s1
     print ("\nCOMPLETE - Totaal aantal sec : "+ str(s4))
 
+def countdown(t):
+    """ Creating a countdown timer to show the wait time
+
+    https://www.geeksforgeeks.org/how-to-create-a-countdown-timer-using-python/
+    Args:
+        t (integer): Wait time in seconds
+    """    
+    while t:
+        mins, secs = divmod(t, 60)
+        timer = '{:02d}:{:02d}'.format(mins, secs)
+        print(timer, end="\r")
+        time.sleep(1)
+        t -= 1
+
+
+
 def downloadplaylist(url):
     #url = "https://www.youtube.com/watch?list=PLTo6svdhIL1cxS4ffGueFpVCF756ip-ab"
-    YOUTUBE_STREAM_AUDIO = '140' # modify the value to download a different stream
+    YOUTUBE_STREAM_AUDIO = '140' # modify the value to download a different stream / mime_type="audio/mp4" abr="128kbps" acodec="mp4a.40.2"
     playlist = Playlist(url)
 
     # this fixes the empty playlist.videos list
@@ -83,15 +113,31 @@ def downloadplaylist(url):
     # physically downloading the audio track
     for n,video in enumerate(playlist.videos):
         try:
-            print (f"Downloading {n}/{len(playlist.video_urls)} - {video.title}")
-            audioStream = video.streams.get_by_itag(YOUTUBE_STREAM_AUDIO)
-            audioStream.download()
-        except:
-            # some videos give 403 error
-            # too lazy to implement this (yet)
-            # https://github.com/pytube/pytube/issues/399
-            print (f"ERROR Downloading {n}/{len(playlist.video_urls)} - {video.title}")
+            mp4 = video.title + ".mp4"
+            if os.path.isfile(mp4):
+                print (f"{n}/{len(playlist.video_urls)} | File {video.title}.mp4 exists already. ")
+                no_wait = True
+            else:
 
+
+                print (f"Downloading {n}/{len(playlist.video_urls)} - {video.title}")
+                audioStream = video.streams.get_by_itag(YOUTUBE_STREAM_AUDIO)
+                audioStream.download()
+                no_wait = False
+
+
+
+        except:
+            print (f"ERROR Downloading {n}/{len(playlist.video_urls)} ")
+                    # some videos give 403 error
+                    # too lazy to implement this (yet)
+                    # https://github.com/pytube/pytube/issues/399
+        if no_wait:
+            pass
+        else:
+            wait_time = randint(10,30)
+            print(f"Waiting {wait_time} seconds...")
+            countdown(wait_time)
 def main():
     url = input("URL: ")
 

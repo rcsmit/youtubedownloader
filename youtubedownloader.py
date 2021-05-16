@@ -97,27 +97,46 @@ def downloadplaylist(url):
     # this fixes the empty playlist.videos list
     playlist._video_regex = re.compile(r"\"url\":\"(/watch\?v=[\w-]*)")
 
+    to_start_ = int( input ("Where to start ? "))
+    if to_start_ == None:
+        START = 0
+    else:
+        START = to_start_ -1
+
+
     # physically downloading the audio track
     for n,video in enumerate(playlist.videos):
-        try:
-            mp4 = video.title + ".mp4"
-            if os.path.isfile(mp4):
-                print (f"{n+1}/{len(playlist.video_urls)} | File {video.title}.mp4 exists already. ")
-                wait = False
-            else:
-                print (f"Downloading {n+1}/{len(playlist.video_urls)} - {video.title}")
-                audioStream = video.streams.get_by_itag(YOUTUBE_STREAM_AUDIO)
-                audioStream.download()
-                wait = True
-        except:
-            print (f"ERROR Downloading {n+1}/{len(playlist.video_urls)} ")
-                    # some videos give 403 error
-                    # too lazy to implement this (yet)
-                    # https://github.com/pytube/pytube/issues/399
-            wait = False
-        if wait:
-            wait_time = randint(10,30)
-            countdown(wait_time)
+        wait = False
+        if n >= START:
+            try:
+
+                mp4 = video.title + ".mp4"
+                # if os.path.isfile(mp4):
+                #     print (f"{n+1}/{len(playlist.video_urls)} | File {video.title}.mp4 exists already. ")
+
+                # else:
+                dl_yes = input (f"Download {n+1}/{len(playlist.video_urls)} - {video.title} ? (y/n/q) ")
+                # dl_yes = "y"   # if you don't want the question
+                if dl_yes == "y" or dl_yes == "Y":
+                    print (f"Downloading {n+1}/{len(playlist.video_urls)} - {video.title}")
+                    audioStream = video.streams.get_by_itag(YOUTUBE_STREAM_AUDIO)
+                    audioStream.download()
+                    wait = True
+                elif dl_yes == "q" or dl_yes == "Q":
+                    sys.exit()
+            except SystemExit:
+                print()
+                print ("Thank you for using this script.")
+                sys.exit()
+            except:
+                print (f"ERROR Downloading or finding the name of  {n+1}/{len(playlist.video_urls)} ")
+                        # some videos give 403 error
+                        # too lazy to implement this (yet)
+                        # https://github.com/pytube/pytube/issues/399
+
+            if wait:
+                wait_time = randint(10,30)
+                countdown(wait_time)
 def main():
     url = input("URL to download: ")
 
